@@ -2,6 +2,9 @@ from pathlib import Path
 
 import typer
 
+from wheely_bucket.parse_lockfile import PackageSpec, parse_project
+from wheely_bucket.wrap_dl import pip_dl
+
 CUR_DIR = Path()
 
 wb_cli = typer.Typer(
@@ -26,7 +29,8 @@ def package(
     python_version and platform are expected in a form understood by 'pip download'; if not
     specified pip will default to matching the currently running interpreter.
     """
-    raise NotImplementedError
+    specs = (PackageSpec.from_string(p) for p in packages)
+    pip_dl(packages=specs, dest=dest, python_version=python_version, platform=platform)
 
 
 @wb_cli.command()
@@ -36,6 +40,7 @@ def project(
     recurse: bool = False,
     python_version: str | None = None,
     platform: str | None = None,
+    lock_filename: str = "uv.lock",
 ) -> None:
     """
     Download wheels specified by the project's uv lockfile.
@@ -46,7 +51,8 @@ def project(
     If recurse is True, the specified topdir is assumed to contain one or more projects managed by
     uv, and will recursively parse all contained lockfiles for locked dependencies.
     """
-    raise NotImplementedError
+    specs = parse_project(base_dir=topdir, lock_filename=lock_filename, recurse=recurse)
+    pip_dl(packages=specs, dest=dest, python_version=python_version, platform=platform)
 
 
 if __name__ == "__main__":

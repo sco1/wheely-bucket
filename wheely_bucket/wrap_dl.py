@@ -1,12 +1,16 @@
 import subprocess
 import sys
+from collections import abc
 from pathlib import Path
 
 from wheely_bucket.parse_lockfile import PackageSpec
 
 
 def pip_dl(
-    package: PackageSpec, dest: Path, python_version: str | None = None, platform: str | None = None
+    packages: abc.Iterable[PackageSpec],
+    dest: Path,
+    python_version: str | None = None,
+    platform: str | None = None,
 ) -> None:
     """
     Thin wrapper around the `pip download` CLI invocation.
@@ -46,6 +50,6 @@ def pip_dl(
             ]
         )
 
-    pip_cmd.append(package.spec)
+    pip_cmd.extend((p.spec for p in packages))
 
     subprocess.check_call(pip_cmd)

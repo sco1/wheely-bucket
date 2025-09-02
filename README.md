@@ -112,6 +112,7 @@ Options:
   --recurse / --no-recurse  [default: no-recurse]
   --python-version TEXT
   --platform TEXT
+  --lock-filename TEXT      [default: uv.lock]
   --help                    Show this message and exit.
 ```
 
