@@ -7,7 +7,7 @@ import typer
 from wheely_bucket.parse_lockfile import PackageSpec, parse_project
 from wheely_bucket.wrap_dl import pip_dl
 
-CUR_DIR = Path()
+CWD = Path()
 
 wb_cli = typer.Typer(
     no_args_is_help=True,
@@ -41,15 +41,16 @@ def _dl_pipeline(
 
 @wb_cli.command()
 def package(
-    packages: list[str],
-    dest: Path = CUR_DIR,
-    python_version: list[str] | None = None,
-    platform: list[str] | None = None,
+    packages: list[str] = typer.Argument(..., help="Package(s) to download"),
+    dest: Path = typer.Option(CWD, file_okay=False, help="Destination directory"),
+    python_version: list[str] | None = typer.Option(None, help="Python interpreter version(s)"),
+    platform: list[str] | None = typer.Option(None, help="Platform specification(s)"),
 ) -> None:
     """
     Download wheels for the the specified package(s).
 
-    Package specifiers are expected in a form understood by pip, e.g. "black" or "black==25.1.0".
+    Package specifiers are expected in a form understood by pip, e.g. "black" or "black==25.1.0";
+    multiple packages may be specified.
 
     python_version and platform are expected in a form understood by 'pip download'; multiple
     targets may be specified. If not specified, pip will default to matching the currently running
@@ -61,22 +62,22 @@ def package(
 
 @wb_cli.command()
 def project(
-    topdir: Path,
-    dest: Path = CUR_DIR,
-    recurse: bool = False,
-    python_version: list[str] | None = None,
-    platform: list[str] | None = None,
-    lock_filename: str = "uv.lock",
+    topdir: Path = typer.Argument(..., file_okay=False, help="Base directory"),
+    dest: Path = typer.Option(CWD, help="Destination directory", file_okay=False),
+    recurse: bool = typer.Option(False, help="Parse child directories for lockfiles"),
+    python_version: list[str] | None = typer.Option(None, help="Python interpreter version(s)"),
+    platform: list[str] | None = typer.Option(None, help="Platform specification(s)"),
+    lock_filename: str = typer.Option("uv.lock", help="Name of lockfile to match"),
 ) -> None:
     """
     Download wheels specified by the project's uv lockfile.
 
+    If recurse is True, the specified base directory is assumed to contain one or more projects
+    managed by uv, and will recursively parse all contained lockfiles for locked dependencies.
+
     python_version and platform are expected in a form understood by 'pip download'; multiple
     targets may be specified. If not specified, pip will default to matching the currently running
     interpreter.
-
-    If recurse is True, the specified topdir is assumed to contain one or more projects managed by
-    uv, and will recursively parse all contained lockfiles for locked dependencies.
     """
     specs = parse_project(base_dir=topdir, lock_filename=lock_filename, recurse=recurse)
     _dl_pipeline(specs=specs, dest=dest, python_version=python_version, platform=platform)

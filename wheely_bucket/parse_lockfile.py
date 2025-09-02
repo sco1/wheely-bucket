@@ -65,6 +65,9 @@ def parse_project(
     If `exclude_editable` is `True`, editable packages are not extracted from the lockfile being
     parsed; in this context this is generally only the spec for the individual project.
     """
+    if not base_dir.is_dir():
+        raise ValueError("Specified base directory either does not exist or is not a directory.")
+
     if recurse:
         pattern = f"**/{lock_filename}"
     else:

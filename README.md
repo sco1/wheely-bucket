@@ -7,6 +7,8 @@
 
 Cache wheels for your locked dependencies.
 
+This tool is a thin wrapper around [`pip download`](https://pip.pypa.io/en/stable/cli/pip_download/) in order to utilize `pip`'s internal caching mechanisms.
+
 ## Installation
 
 Wheels are built in CI for each released version; the latest release can be found at: <https://github.com/sco1/wheely-bucket/releases/latest>
@@ -41,6 +43,8 @@ Commands:
 
 `wheely-bucket` provides two mechanisms for package specification: manual specification & project lockfile specification.
 
+For both entry points, `python-version` and `platform` allow specification of multiple space-delimited targets of a form understood by `pip download`.
+
 ### Manual Package Specification
 
 Manual package specification is accomplished via the `wheely_bucket package` command:
@@ -60,19 +64,19 @@ Usage: wheely_bucket package [OPTIONS] PACKAGES...
   Download wheels for the the specified package(s).
 
   Package specifiers are expected in a form understood by pip, e.g. "black" or
-  "black==25.1.0".
+  "black==25.1.0"; multiple packages may be specified.
 
   python_version and platform are expected in a form understood by 'pip
-  download'; if not specified pip will default to matching the currently
-  running interpreter.
+  download'; multiple targets may be specified. If not specified, pip will
+  default to matching the currently running interpreter.
 
 Arguments:
-  PACKAGES...  [required]
+  PACKAGES...  Package(s) to download  [required]
 
 Options:
-  --dest PATH            [default: .]
-  --python-version TEXT
-  --platform TEXT
+  --dest DIRECTORY       Destination directory  [default: .]
+  --python-version TEXT  Python interpreter version(s)
+  --platform TEXT        Platform specification(s)
   --help                 Show this message and exit.
 ```
 
@@ -96,23 +100,24 @@ Usage: wheely_bucket project [OPTIONS] TOPDIR
 
   Download wheels specified by the project's uv lockfile.
 
-  python_version and platform are expected in a form understood by 'pip
-  download'; if not specified pip will default to matching the currently
-  running interpreter.
+  If recurse is True, the specified base directory is assumed to contain one
+  or more projects managed by uv, and will recursively parse all contained
+  lockfiles for locked dependencies.
 
-  If recurse is True, the specified topdir is assumed to contain one or more
-  projects managed by uv, and will recursively parse all contained lockfiles
-  for locked dependencies.
+  python_version and platform are expected in a form understood by 'pip
+  download'; multiple targets may be specified. If not specified, pip will
+  default to matching the currently running interpreter.
 
 Arguments:
-  TOPDIR  [required]
+  TOPDIR  Base directory  [required]
 
 Options:
-  --dest PATH               [default: .]
-  --recurse / --no-recurse  [default: no-recurse]
-  --python-version TEXT
-  --platform TEXT
-  --lock-filename TEXT      [default: uv.lock]
+  --dest DIRECTORY          Destination directory  [default: .]
+  --recurse / --no-recurse  Parse child directories for lockfiles  [default:
+                            no-recurse]
+  --python-version TEXT     Python interpreter version(s)
+  --platform TEXT           Platform specification(s)
+  --lock-filename TEXT      Name of lockfile to match  [default: uv.lock]
   --help                    Show this message and exit.
 ```
 
