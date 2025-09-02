@@ -7,7 +7,13 @@ from pathlib import Path
 from packaging.requirements import Requirement
 
 
-class PackageSpec(t.NamedTuple):  # noqa: D101
+class PackageSpec(t.NamedTuple):
+    """
+    Helper container for package specification components.
+
+    NOTE: `locked_ver` is assumed to include constraint operators, e.g. `'==25.1.0'`
+    """
+
     package_name: str
     locked_ver: str | None
 
@@ -18,7 +24,7 @@ class PackageSpec(t.NamedTuple):  # noqa: D101
     def spec(self) -> str:
         """Return a `pip`-compatible package+version specification."""
         if self.locked_ver is not None:
-            return f"{self.package_name}=={self.locked_ver}"
+            return f"{self.package_name}{self.locked_ver}"
         else:
             return self.package_name
 
@@ -36,7 +42,7 @@ class PackageSpec(t.NamedTuple):  # noqa: D101
         """Build a `PackageSpec` instance from a package's `uv.lock` metadata."""
         return cls(
             package_name=locked_info["name"],
-            locked_ver=locked_info["version"],
+            locked_ver=f"=={locked_info["version"]}",  # lockfiles are resolved so == is appropriate
         )
 
 
