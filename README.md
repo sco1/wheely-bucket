@@ -102,7 +102,8 @@ Usage: wheely_bucket project [OPTIONS] TOPDIR
 
   If recurse is True, the specified base directory is assumed to contain one
   or more projects managed by uv, and will recursively parse all contained
-  lockfiles for locked dependencies.
+  lockfiles for locked dependencies. This may necessitate multiple calls to
+  'pip download' in order to avoid conflicting dependencies across projects.
 
   python_version and platform are expected in a form understood by 'pip
   download'; multiple comma-delimited targets may be specified. If not

@@ -15,23 +15,20 @@ def split_conflicting(packages: abc.Iterable[PackageSpec]) -> abc.Iterator[list[
     """
     mapped_packages = defaultdict(list)
     for p in packages:
-        mapped_packages[p.package_name].append(p.locked_ver)
+        mapped_packages[p.package_name].append(p)
 
     while True:
         chunk = []
-        for pname, versions in mapped_packages.items():
+        for versions in mapped_packages.values():
             if len(versions) > 1:
-                chunk.append(PackageSpec(package_name=pname, locked_ver=versions.pop()))
+                chunk.append(versions.pop())
 
         if chunk:
             yield chunk
         else:
             break
 
-    yield [
-        PackageSpec(package_name=pname, locked_ver=versions.pop())
-        for pname, versions in mapped_packages.items()
-    ]
+    yield [versions.pop() for versions in mapped_packages.values()]
 
 
 def pip_dl(

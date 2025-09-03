@@ -5,7 +5,7 @@ from pathlib import Path
 import typer
 
 from wheely_bucket.parse_lockfile import PackageSpec, parse_project
-from wheely_bucket.wrap_dl import pip_dl
+from wheely_bucket.wrap_dl import pip_dl, split_conflicting
 
 CWD = Path()
 
@@ -72,14 +72,23 @@ def project(
     Download wheels specified by the project's uv lockfile.
 
     If recurse is True, the specified base directory is assumed to contain one or more projects
-    managed by uv, and will recursively parse all contained lockfiles for locked dependencies.
+    managed by uv, and will recursively parse all contained lockfiles for locked dependencies. This
+    may necessitate multiple calls to 'pip download' in order to avoid conflicting dependencies
+    across projects.
 
     python_version and platform are expected in a form understood by 'pip download'; multiple
     comma-delimited targets may be specified. If not specified, pip will default to matching the
     currently running interpreter.
     """
     specs = parse_project(base_dir=topdir, lock_filename=lock_filename, recurse=recurse)
-    _dl_pipeline(specs=specs, dest=dest, python_version=python_version, platform=platform)
+
+    # If spanning multiple projects, packages may need to be deconflicted otherwise pip's resolver
+    # will fail
+    if recurse:
+        for chunk in split_conflicting(specs):
+            _dl_pipeline(specs=chunk, dest=dest, python_version=python_version, platform=platform)
+    else:
+        _dl_pipeline(specs=specs, dest=dest, python_version=python_version, platform=platform)
 
 
 if __name__ == "__main__":
