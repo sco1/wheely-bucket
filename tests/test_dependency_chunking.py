@@ -13,7 +13,7 @@ def test_split_conflicting() -> None:
     TRUTH_CHUNKED = [
         [PackageSpec.from_string("abc==0.3.0")],
         [PackageSpec.from_string("abc==0.2.0")],
-        [PackageSpec.from_string("abc==0.1.0"), PackageSpec.from_string("def==0.1.0")]
+        [PackageSpec.from_string("abc==0.1.0"), PackageSpec.from_string("def==0.1.0")],
     ]
 
     chunked = list(split_conflicting(PACKAGES))
@@ -27,7 +27,10 @@ def test_split_conflicting_no_conflict() -> None:
     ]
 
     TRUTH_CHUNKED = [
-        [PackageSpec.from_string("abc==0.1.0"), PackageSpec.from_string("def==0.1.0")]
+        [
+            PackageSpec.from_string("abc==0.1.0"),
+            PackageSpec.from_string("def==0.1.0"),
+        ]
     ]
 
     chunked = list(split_conflicting(PACKAGES))

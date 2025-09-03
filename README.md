@@ -1,3 +1,7 @@
+<p align="center" width="100%">
+<img width="200" src="https://raw.githubusercontent.com/sco1/wheely-bucket/refs/heads/main/assets/icon.png">
+</p>
+
 # wheely-bucket
 
 [![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fsco1%2Fwheely-bucket%2Frefs%2Fheads%2Fmain%2Fpyproject.toml&logo=python&logoColor=FFD43B)](https://github.com/sco1/wheely-bucket/blob/main/pyproject.toml)

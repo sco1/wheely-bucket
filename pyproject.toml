@@ -85,7 +85,7 @@ warn_unused_ignores = true
 
 [tool.rumdl]
 line-length = 100
-disable = ["MD013", "MD033"]
+disable = ["MD013", "MD033", "MD041"]
 
 [tool.uv.build-backend]
 module-name = "wheely_bucket"
