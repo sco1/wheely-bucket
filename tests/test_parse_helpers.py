@@ -89,21 +89,12 @@ def test_parse_project_include_editable(tmp_path: Path) -> None:
     assert parse_project(base_dir=tmp_path, exclude_editable=False) == TRUTH_PACKAGES
 
 
-def test_parse_project_recurse(tmp_path: Path) -> None:
-    child_path = tmp_path / "my_project"
-    child_path.mkdir()
-    lf = child_path / "uv.lock"
-    lf.write_text(DUMMY_LOCK)
-
-    TRUTH_PACKAGES = {
-        PackageSpec(package_name="cogapp", locked_ver="==3.5.1"),
-        PackageSpec(package_name="pip", locked_ver="==25.2"),
-    }
-
-    assert parse_project(base_dir=tmp_path, recurse=True) == TRUTH_PACKAGES
-
-
 def test_parse_project_invalid_basedir_raises() -> None:
     missing_dir = Path() / "m/i/s/s/i/n/g/"
     with pytest.raises(ValueError, match="base directory"):
         _ = parse_project(base_dir=missing_dir)
+
+
+def test_parse_project_no_lockfile_raises(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="Lockfile"):
+        _ = parse_project(base_dir=tmp_path)

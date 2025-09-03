@@ -50,14 +50,9 @@ def parse_project(
     base_dir: Path,
     lock_filename: str = "uv.lock",
     exclude_editable: bool = True,
-    recurse: bool = False,
 ) -> set[PackageSpec]:
     """
     Parse project lockfile(s) into a set of `PackageSpec` instances.
-
-    If `recurse` is `False`, it is assumed that `base_dir` points to the top level of the project
-    whose lockfile is to be parsed. Otherwise, lockfiles are discovered recursively and parsed into
-    a single set of specs.
 
     `lock_filename` may be adjusted to match the desired lockfile filename. Note that matching is
     not case sensitive.
@@ -68,23 +63,18 @@ def parse_project(
     if not base_dir.is_dir():
         raise ValueError("Specified base directory either does not exist or is not a directory.")
 
-    if recurse:
-        pattern = f"**/{lock_filename}"
-    else:
-        pattern = lock_filename
+    lockfile = base_dir / lock_filename
+    if not lockfile.exists():
+        raise ValueError(f"Lockfile does not exist: '{lockfile}'")
 
-    lockfiles = tuple(base_dir.glob(pattern, case_sensitive=False))
-    print(f"Found {len(lockfiles)} lockfile(s) to process...")
+    with lockfile.open("rb") as f:
+        locked = tomllib.load(f)
 
     packages = set()
-    for lf in lockfiles:
-        with lf.open("rb") as f:
-            locked = tomllib.load(f)
+    for p in locked["package"]:
+        if exclude_editable and ("editable" in p["source"]):
+            continue
 
-        for p in locked["package"]:
-            if exclude_editable and ("editable" in p["source"]):
-                continue
-
-            packages.add(PackageSpec.from_lock(p))
+        packages.add(PackageSpec.from_lock(p))
 
     return packages

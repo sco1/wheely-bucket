@@ -1,34 +1,9 @@
 import subprocess
 import sys
-from collections import abc, defaultdict
+from collections import abc
 from pathlib import Path
 
 from wheely_bucket.parse_lockfile import PackageSpec
-
-
-def split_conflicting(packages: abc.Iterable[PackageSpec]) -> abc.Iterator[list[PackageSpec]]:
-    """
-    Split the provided `PackageSpec`s into the largest possible non-conflicting chunks.
-
-    Because `pip download` attempts to resolve the dependencies passed, multiple locked versions of
-    the same package will result in a `ResolutionImpossible` error.
-    """
-    mapped_packages = defaultdict(list)
-    for p in packages:
-        mapped_packages[p.package_name].append(p)
-
-    while True:
-        chunk = []
-        for versions in mapped_packages.values():
-            if len(versions) > 1:
-                chunk.append(versions.pop())
-
-        if chunk:
-            yield chunk
-        else:
-            break
-
-    yield [versions.pop() for versions in mapped_packages.values()]
 
 
 def pip_dl(

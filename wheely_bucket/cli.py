@@ -5,7 +5,7 @@ from pathlib import Path
 import typer
 
 from wheely_bucket.parse_lockfile import PackageSpec, parse_project
-from wheely_bucket.wrap_dl import pip_dl, split_conflicting
+from wheely_bucket.wrap_dl import pip_dl
 
 CWD = Path()
 
@@ -72,22 +72,22 @@ def project(
     Download wheels specified by the project's uv lockfile.
 
     If recurse is True, the specified base directory is assumed to contain one or more projects
-    managed by uv, and will recursively parse all contained lockfiles for locked dependencies. This
-    may necessitate multiple calls to 'pip download' in order to avoid conflicting dependencies
-    across projects.
+    managed by uv, and will recursively parse all contained lockfiles for locked dependencies. To
+    avoid resolver issues, 'pip download' is called for each child project discovered.
 
     python_version and platform are expected in a form understood by 'pip download'; multiple
     comma-delimited targets may be specified. If not specified, pip will default to matching the
     currently running interpreter.
     """
-    specs = parse_project(base_dir=topdir, lock_filename=lock_filename, recurse=recurse)
-
-    # If spanning multiple projects, packages may need to be deconflicted otherwise pip's resolver
-    # will fail
     if recurse:
-        for chunk in split_conflicting(specs):
-            _dl_pipeline(specs=chunk, dest=dest, python_version=python_version, platform=platform)
+        lockfiles = tuple(topdir.rglob(lock_filename))
+        print(f"Found {len(lockfiles)} project(s) to cache...")
+
+        for subp in lockfiles:
+            specs = parse_project(base_dir=subp.parent, lock_filename=lock_filename)
+            _dl_pipeline(specs=specs, dest=dest, python_version=python_version, platform=platform)
     else:
+        specs = parse_project(base_dir=topdir, lock_filename=lock_filename)
         _dl_pipeline(specs=specs, dest=dest, python_version=python_version, platform=platform)
 
 
