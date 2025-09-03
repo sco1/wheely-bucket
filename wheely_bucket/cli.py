@@ -19,21 +19,18 @@ wb_cli = typer.Typer(
 def _dl_pipeline(
     specs: abc.Iterable[PackageSpec],
     dest: Path,
-    python_version: abc.Iterable[str] | None,
-    platform: abc.Iterable[str] | None,
+    python_version: str | None,
+    platform: str | None,
 ) -> None:
     """Helper download pipeline to iterate over python version & platform permutations."""
     if (python_version is not None) and (platform is not None):
-        for ver, plat in itertools.product(python_version, platform):
+        for ver, plat in itertools.product(python_version.split(","), platform.split(",")):
             pip_dl(packages=specs, dest=dest, python_version=ver, platform=plat)
     elif python_version is not None:
-        for ver in python_version:
-            # I think the narrowing is correct here, but mypy doesn't seem to infer accurately
-            # Being more explicit with the elif fixes one problem but makes another for the else
-            # statement, so everything gets uglier and I like it this way better
-            pip_dl(packages=specs, dest=dest, python_version=ver, platform=platform)  # type: ignore[arg-type]
+        for ver in python_version.split(","):
+            pip_dl(packages=specs, dest=dest, python_version=ver, platform=platform)
     elif platform is not None:
-        for plat in platform:
+        for plat in platform.split(","):
             pip_dl(packages=specs, dest=dest, python_version=python_version, platform=plat)
     else:
         pip_dl(packages=specs, dest=dest, python_version=python_version, platform=platform)
@@ -43,8 +40,8 @@ def _dl_pipeline(
 def package(
     packages: list[str] = typer.Argument(..., help="Package(s) to download"),
     dest: Path = typer.Option(CWD, file_okay=False, help="Destination directory"),
-    python_version: list[str] | None = typer.Option(None, help="Python interpreter version(s)"),
-    platform: list[str] | None = typer.Option(None, help="Platform specification(s)"),
+    python_version: str | None = typer.Option(None, help="Python interpreter version(s)"),
+    platform: str | None = typer.Option(None, help="Platform specification(s)"),
 ) -> None:
     """
     Download wheels for the the specified package(s).
@@ -53,10 +50,10 @@ def package(
     multiple packages may be specified.
 
     python_version and platform are expected in a form understood by 'pip download'; multiple
-    targets may be specified. If not specified, pip will default to matching the currently running
-    interpreter.
+    comma-delimited targets may be specified. If not specified, pip will default to matching the
+    currently running interpreter.
     """
-    specs = (PackageSpec.from_string(p) for p in packages)
+    specs = {PackageSpec.from_string(p) for p in packages}
     _dl_pipeline(specs=specs, dest=dest, python_version=python_version, platform=platform)
 
 
@@ -64,10 +61,12 @@ def package(
 def project(
     topdir: Path = typer.Argument(..., file_okay=False, help="Base directory"),
     dest: Path = typer.Option(CWD, help="Destination directory", file_okay=False),
-    recurse: bool = typer.Option(False, help="Parse child directories for lockfiles"),
-    python_version: list[str] | None = typer.Option(None, help="Python interpreter version(s)"),
-    platform: list[str] | None = typer.Option(None, help="Platform specification(s)"),
+    recurse: bool = typer.Option(
+        False, "-r", "--recurse", help="Parse child directories for lockfiles [default: False]"
+    ),
     lock_filename: str = typer.Option("uv.lock", help="Name of lockfile to match"),
+    python_version: str | None = typer.Option(None, help="Python interpreter version(s)"),
+    platform: str | None = typer.Option(None, help="Platform specification(s)"),
 ) -> None:
     """
     Download wheels specified by the project's uv lockfile.
@@ -76,8 +75,8 @@ def project(
     managed by uv, and will recursively parse all contained lockfiles for locked dependencies.
 
     python_version and platform are expected in a form understood by 'pip download'; multiple
-    targets may be specified. If not specified, pip will default to matching the currently running
-    interpreter.
+    comma-delimited targets may be specified. If not specified, pip will default to matching the
+    currently running interpreter.
     """
     specs = parse_project(base_dir=topdir, lock_filename=lock_filename, recurse=recurse)
     _dl_pipeline(specs=specs, dest=dest, python_version=python_version, platform=platform)

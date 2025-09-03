@@ -33,7 +33,7 @@ def test_dl_pipeline_multi_python(mocker: MockerFixture) -> None:
 
     specs = [PackageSpec.from_string("black")]
     dest = Path()
-    python_version = ["3.13", "3.14"]
+    python_version = "3.13,3.14"
 
     _dl_pipeline(
         specs=specs,
@@ -50,7 +50,7 @@ def test_dl_pipeline_multi_platform(mocker: MockerFixture) -> None:
 
     specs = [PackageSpec.from_string("black")]
     dest = Path()
-    platform = ["arm64", "win_amd64"]
+    platform = "arm64,win_amd64"
 
     _dl_pipeline(
         specs=specs,
@@ -67,8 +67,8 @@ def test_dl_pipeline_multi_python_multi_platform(mocker: MockerFixture) -> None:
 
     specs = [PackageSpec.from_string("black")]
     dest = Path()
-    python_version = ["3.13", "3.14"]
-    platform = ["arm64", "win_amd64"]
+    python_version = "3.13,3.14"
+    platform = "arm64,win_amd64"
 
     _dl_pipeline(
         specs=specs,

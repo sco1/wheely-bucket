@@ -43,7 +43,7 @@ Commands:
 
 `wheely-bucket` provides two mechanisms for package specification: manual specification & project lockfile specification.
 
-For both entry points, `python-version` and `platform` allow specification of multiple space-delimited targets of a form understood by `pip download`.
+For both entry points, `python-version` and `platform` allow specification of multiple comma-delimited targets of a form understood by `pip download`.
 
 ### Manual Package Specification
 
@@ -67,8 +67,8 @@ Usage: wheely_bucket package [OPTIONS] PACKAGES...
   "black==25.1.0"; multiple packages may be specified.
 
   python_version and platform are expected in a form understood by 'pip
-  download'; multiple targets may be specified. If not specified, pip will
-  default to matching the currently running interpreter.
+  download'; multiple comma-delimited targets may be specified. If not
+  specified, pip will default to matching the currently running interpreter.
 
 Arguments:
   PACKAGES...  Package(s) to download  [required]
@@ -105,20 +105,20 @@ Usage: wheely_bucket project [OPTIONS] TOPDIR
   lockfiles for locked dependencies.
 
   python_version and platform are expected in a form understood by 'pip
-  download'; multiple targets may be specified. If not specified, pip will
-  default to matching the currently running interpreter.
+  download'; multiple comma-delimited targets may be specified. If not
+  specified, pip will default to matching the currently running interpreter.
 
 Arguments:
   TOPDIR  Base directory  [required]
 
 Options:
-  --dest DIRECTORY          Destination directory  [default: .]
-  --recurse / --no-recurse  Parse child directories for lockfiles  [default:
-                            no-recurse]
-  --python-version TEXT     Python interpreter version(s)
-  --platform TEXT           Platform specification(s)
-  --lock-filename TEXT      Name of lockfile to match  [default: uv.lock]
-  --help                    Show this message and exit.
+  --dest DIRECTORY       Destination directory  [default: .]
+  -r, --recurse          Parse child directories for lockfiles [default:
+                         False]
+  --lock-filename TEXT   Name of lockfile to match  [default: uv.lock]
+  --python-version TEXT  Python interpreter version(s)
+  --platform TEXT        Platform specification(s)
+  --help                 Show this message and exit.
 ```
 
 <!-- [[[end]]] -->

@@ -50,6 +50,6 @@ def pip_dl(
             ]
         )
 
-    pip_cmd.extend((p.spec for p in packages))
+    pip_cmd.extend(p.spec for p in packages)
 
     subprocess.check_call(pip_cmd)
