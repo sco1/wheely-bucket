@@ -1,6 +1,6 @@
 [project]
 name = "wheely-bucket"
-version = "0.1.0"
+version = "0.2.0"
 description = "Cache wheels for your locked dependencies"
 license = "MIT"
 license-files = ["LICENSE"]
