@@ -2,6 +2,11 @@
 
 Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (`<major>`.`<minor>`.`<patch>`)
 
+## `[v0.2.1]`
+
+### Changed
+* #2, #3 When using `wheely_bucket project --recurse`, `pip download` is called per-project rather than attempting to mitigate resolver issues
+
 ## `[v0.2.0]`
 
 ### Changed

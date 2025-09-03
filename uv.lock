@@ -631,7 +631,7 @@ wheels = [
 
 [[package]]
 name = "wheely-bucket"
-version = "0.2.0"
+version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "packaging" },
@@ -662,7 +662,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "packaging", specifier = "~=25.0" },
+    { name = "packaging", specifier = ">=25.0" },
     { name = "pip", specifier = ">=25.2" },
     { name = "typer-slim", specifier = "~=0.17" },
 ]
