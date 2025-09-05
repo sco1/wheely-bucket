@@ -1,11 +1,6 @@
-import itertools
-from collections import abc
 from pathlib import Path
 
 import typer
-
-from wheely_bucket.parse_lockfile import PackageSpec, parse_project
-from wheely_bucket.wrap_dl import pip_dl
 
 CWD = Path()
 
@@ -14,26 +9,6 @@ wb_cli = typer.Typer(
     add_completion=False,
     help="Cache wheels for your locked dependencies.",
 )
-
-
-def _dl_pipeline(
-    specs: abc.Iterable[PackageSpec],
-    dest: Path,
-    python_version: str | None,
-    platform: str | None,
-) -> None:
-    """Helper download pipeline to iterate over python version & platform permutations."""
-    if (python_version is not None) and (platform is not None):
-        for ver, plat in itertools.product(python_version.split(","), platform.split(",")):
-            pip_dl(packages=specs, dest=dest, python_version=ver, platform=plat)
-    elif python_version is not None:
-        for ver in python_version.split(","):
-            pip_dl(packages=specs, dest=dest, python_version=ver, platform=platform)
-    elif platform is not None:
-        for plat in platform.split(","):
-            pip_dl(packages=specs, dest=dest, python_version=python_version, platform=plat)
-    else:
-        pip_dl(packages=specs, dest=dest, python_version=python_version, platform=platform)
 
 
 @wb_cli.command()
@@ -53,8 +28,7 @@ def package(
     comma-delimited targets may be specified. If not specified, pip will default to matching the
     currently running interpreter.
     """
-    specs = {PackageSpec.from_string(p) for p in packages}
-    _dl_pipeline(specs=specs, dest=dest, python_version=python_version, platform=platform)
+    raise NotImplementedError
 
 
 @wb_cli.command()
@@ -79,16 +53,7 @@ def project(
     comma-delimited targets may be specified. If not specified, pip will default to matching the
     currently running interpreter.
     """
-    if recurse:
-        lockfiles = tuple(topdir.rglob(lock_filename))
-        print(f"Found {len(lockfiles)} project(s) to cache...")
-
-        for subp in lockfiles:
-            specs = parse_project(base_dir=subp.parent, lock_filename=lock_filename)
-            _dl_pipeline(specs=specs, dest=dest, python_version=python_version, platform=platform)
-    else:
-        specs = parse_project(base_dir=topdir, lock_filename=lock_filename)
-        _dl_pipeline(specs=specs, dest=dest, python_version=python_version, platform=platform)
+    raise NotImplementedError
 
 
 if __name__ == "__main__":
