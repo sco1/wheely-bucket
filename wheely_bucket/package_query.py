@@ -51,11 +51,11 @@ def query_pypi_simple(package_name: str) -> tuple[list[PackageSpec], list[Versio
     package_info = r.json()
     packages = []
     for f in reversed(package_info["files"]):
-        url: str = f["url"]
-        if not url.endswith(".whl"):
+        if f.get("yanked", False):
             continue
 
-        if f.get("yanked", False):
+        url: str = f["url"]
+        if not url.endswith(".whl"):
             continue
 
         packages.append(PackageSpec.from_url(f["url"]))

@@ -1,10 +1,17 @@
+from collections import abc
 from pathlib import Path
 
 import pytest
 from packaging.tags import parse_tag
+from packaging.utils import parse_wheel_filename
 from packaging.version import Version
 
-from wheely_bucket.parse_lockfile import PIP_HTTP_CACHE, PackageSpec, parse_project
+from wheely_bucket.parse_lockfile import (
+    PIP_HTTP_CACHE,
+    PackageSpec,
+    is_compatible_with,
+    parse_project,
+)
 
 
 def test_package_spec_from_url() -> None:
@@ -149,3 +156,32 @@ def test_parse_project(tmp_path: Path) -> None:
     }
 
     assert parse_project(base_dir=tmp_path) == TRUTH_PACKAGES
+
+
+COMPAT_TEST_CASES = (
+    ("pip-25.2-py3-none-any.whl", (3, 14), ("win_amd64",), True),
+    ("pip-25.2-py3-none-any.whl", (3, 14), ("win_amd64", "macosx_11_0_arm64"), True),
+    ("pip-25.2-py3-none-any.whl", None, None, True),
+    ("pip-25.2-py3-none-any.whl", (3, 14), None, True),
+    ("pip-25.2-py3-none-any.whl", None, ("win_amd64"), True),
+    ("black-25.1.0-cp313-cp313-win_amd64.whl", (3, 13), ("win_amd64",), True),
+    ("black-25.1.0-cp313-cp313-win_amd64.whl", (3, 13), ("macosx_11_0_arm64",), False),
+    ("black-25.1.0-cp313-cp313-win_amd64.whl", (3, 14), ("win_amd64",), False),
+)
+
+
+@pytest.mark.parametrize(
+    ("wheel_name", "python_version", "platforms", "truth_out"), COMPAT_TEST_CASES
+)
+def test_is_compatible_with(
+    wheel_name: str,
+    python_version: abc.Sequence[int],
+    platforms: abc.Iterable[str],
+    truth_out: bool,
+) -> None:
+    *_, tags = parse_wheel_filename(wheel_name)
+
+    assert (
+        is_compatible_with(tags=tags, python_version=python_version, platforms=platforms)
+        == truth_out
+    )
