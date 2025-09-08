@@ -2,6 +2,11 @@
 
 Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (`<major>`.`<minor>`.`<patch>`)
 
+## `[v0.3.0]`
+
+### Changed
+* (Internal) #4 Refactor away from `pip download` in favor of internal downloading; an attempt is still made to utilize `pip`'s HTTP cache prior to queuing a download
+
 ## `[v0.2.1]`
 
 ### Changed

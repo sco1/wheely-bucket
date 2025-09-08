@@ -1,6 +1,6 @@
 [project]
 name = "wheely-bucket"
-version = "0.2.1"
+version = "0.3.0"
 description = "Cache wheels for your locked dependencies"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -22,6 +22,7 @@ classifiers = [
 
 requires-python = ">=3.12"
 dependencies = [
+    "httpx~=0.28",
     "packaging>=25.0",
     "pip>=25.2",
     "typer-slim~=0.17",

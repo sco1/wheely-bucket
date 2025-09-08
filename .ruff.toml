@@ -55,7 +55,9 @@ ignore = [
 [lint.per-file-ignores]
 "tests/test_*.py" = [
     "D101",
+    "D102",
     "D103",
+    "E501",
 ]
 
 [lint.flake8-bugbear]

@@ -1,37 +1,96 @@
+from collections import abc
 from pathlib import Path
 
 import pytest
+from packaging.tags import parse_tag
+from packaging.utils import parse_wheel_filename
+from packaging.version import Version
 
-from wheely_bucket.parse_lockfile import PackageSpec, parse_project
-
-
-def test_packagespec_from_lock_spec() -> None:
-    LOCK_SPEC = {"name": "black", "version": "25.1.0"}
-    TRUTH_SPEC = PackageSpec(package_name="black", locked_ver="==25.1.0")
-
-    assert PackageSpec.from_lock(LOCK_SPEC) == TRUTH_SPEC
-
-
-FROM_STR_TEST_CASES = (
-    ("black==25.1.0", PackageSpec(package_name="black", locked_ver="==25.1.0")),
-    ("black", PackageSpec(package_name="black", locked_ver=None)),
+from wheely_bucket.parse_lockfile import (
+    PIP_HTTP_CACHE,
+    PackageSpec,
+    is_compatible_with,
+    parse_project,
 )
 
 
-@pytest.mark.parametrize(("spec_str", "truth_spec"), FROM_STR_TEST_CASES)
-def test_packagespec_from_str(spec_str: str, truth_spec: PackageSpec) -> None:
-    assert PackageSpec.from_string(spec_str) == truth_spec
+def test_package_spec_from_url() -> None:
+    WHEEL_URL = "https://a.b.c/packages/def/pip-25.2-py3-none-any.whl"
+    TRUTH_P = PackageSpec(
+        package_name="pip",
+        version=Version("25.2"),
+        wheel_name="pip-25.2-py3-none-any.whl",
+        wheel_url=WHEEL_URL,
+        tags=parse_tag("py3-none-any"),
+    )
+
+    assert PackageSpec.from_url(WHEEL_URL) == TRUTH_P
 
 
-ROUNDTRIP_CASES = ("black==25.1.0", "black")
+def test_package_from_lock_spec() -> None:
+    LOCK_SPEC = {
+        "name": "pip",
+        "version": "25.2",
+        "source": {"registry": "https://pypi.org/simple"},
+        "sdist": {
+            "url": "...",
+            "hash": "...",
+            "size": 59428,
+            "upload-time": "2025-06-10T12:42:39.607Z",
+        },
+        "wheels": [
+            {
+                "url": "https://a.b.c/packages/def/pip-25.2-py3-none-any.whl",
+                "hash": "...",
+                "size": 1752557,
+                "upload-time": "2025-07-30T21:50:13.323Z",
+            }
+        ],
+    }
+
+    TRUTH_P = PackageSpec(
+        package_name="pip",
+        version=Version("25.2"),
+        wheel_name="pip-25.2-py3-none-any.whl",
+        wheel_url="https://a.b.c/packages/def/pip-25.2-py3-none-any.whl",
+        tags=parse_tag("py3-none-any"),
+    )
+
+    assert PackageSpec.from_lock(LOCK_SPEC) == {TRUTH_P}
 
 
-@pytest.mark.parametrize(("spec_str"), ROUNDTRIP_CASES)
-def test_spec_roundtrip(spec_str: str) -> None:
-    spec = PackageSpec.from_string(spec_str)
+def test_package_from_lock_spec_no_wheels() -> None:
+    LOCK_SPEC = {
+        "name": "pip",
+        "version": "25.2",
+        "source": {"registry": "https://pypi.org/simple"},
+        "sdist": {
+            "url": "...",
+            "hash": "...",
+            "size": 59428,
+            "upload-time": "2025-06-10T12:42:39.607Z",
+        },
+    }
 
-    assert PackageSpec.from_string(spec.spec) == spec
-    assert PackageSpec.from_string(str(spec)) == spec
+    assert PackageSpec.from_lock(LOCK_SPEC) == set()
+
+
+def test_url_hash() -> None:
+    WHEEL_URL = "https://a.b.c/packages/def/pip-25.2-py3-none-any.whl"
+    p = PackageSpec.from_url(WHEEL_URL)
+
+    assert p.url_hash == "f3843723907efec12c032a6c44eeebbba2618c74a78c3a579d6f504c"
+
+
+def test_cache_path() -> None:
+    WHEEL_URL = "https://a.b.c/packages/def/pip-25.2-py3-none-any.whl"
+    p = PackageSpec.from_url(WHEEL_URL)
+
+    TRUTH_PATH = (
+        PIP_HTTP_CACHE / "f/3/8/4/3/f3843723907efec12c032a6c44eeebbba2618c74a78c3a579d6f504c.body"
+    )
+
+    assert p.cached_wheel_path == TRUTH_PATH
 
 
 DUMMY_LOCK = """\
@@ -45,7 +104,7 @@ version = "3.5.1"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "...", hash = "...", size = 59428, upload-time = "2025-06-10T12:42:39.607Z" }
 wheels = [
-    { url = "...", hash = "...", size = 30390, upload-time = "2025-06-10T12:42:38.203Z" },
+    { url = "https://a.b.c/packages/abc/cogapp-3.5.1-py3-none-any.whl", hash = "...", size = 30390, upload-time = "2025-06-10T12:42:38.203Z" },
 ]
 
 [[package]]
@@ -54,7 +113,7 @@ version = "25.2"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "...", hash = "...", size = 1840021, upload-time = "2025-07-30T21:50:15.401Z" }
 wheels = [
-    { url = "...", hash = "...", size = 1752557, upload-time = "2025-07-30T21:50:13.323Z" },
+    { url = "https://a.b.c/packages/def/pip-25.2-py3-none-any.whl", hash = "...", size = 1752557, upload-time = "2025-07-30T21:50:13.323Z" },
 ]
 
 [[package]]
@@ -62,31 +121,6 @@ name = "wheely-bucket"
 version = "0.1.0"
 source = { editable = "." }
 """
-
-
-def test_parse_project(tmp_path: Path) -> None:
-    lf = tmp_path / "uv.lock"
-    lf.write_text(DUMMY_LOCK)
-
-    TRUTH_PACKAGES = {
-        PackageSpec(package_name="cogapp", locked_ver="==3.5.1"),
-        PackageSpec(package_name="pip", locked_ver="==25.2"),
-    }
-
-    assert parse_project(base_dir=tmp_path) == TRUTH_PACKAGES
-
-
-def test_parse_project_include_editable(tmp_path: Path) -> None:
-    lf = tmp_path / "uv.lock"
-    lf.write_text(DUMMY_LOCK)
-
-    TRUTH_PACKAGES = {
-        PackageSpec(package_name="cogapp", locked_ver="==3.5.1"),
-        PackageSpec(package_name="pip", locked_ver="==25.2"),
-        PackageSpec(package_name="wheely-bucket", locked_ver="==0.1.0"),
-    }
-
-    assert parse_project(base_dir=tmp_path, exclude_editable=False) == TRUTH_PACKAGES
 
 
 def test_parse_project_invalid_basedir_raises() -> None:
@@ -98,3 +132,56 @@ def test_parse_project_invalid_basedir_raises() -> None:
 def test_parse_project_no_lockfile_raises(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="Lockfile"):
         _ = parse_project(base_dir=tmp_path)
+
+
+def test_parse_project(tmp_path: Path) -> None:
+    lf = tmp_path / "uv.lock"
+    lf.write_text(DUMMY_LOCK)
+
+    TRUTH_PACKAGES = {
+        PackageSpec(
+            package_name="cogapp",
+            version=Version("3.5.1"),
+            wheel_name="cogapp-3.5.1-py3-none-any.whl",
+            wheel_url="https://a.b.c/packages/abc/cogapp-3.5.1-py3-none-any.whl",
+            tags=parse_tag("py3-none-any"),
+        ),
+        PackageSpec(
+            package_name="pip",
+            version=Version("25.2"),
+            wheel_name="pip-25.2-py3-none-any.whl",
+            wheel_url="https://a.b.c/packages/def/pip-25.2-py3-none-any.whl",
+            tags=parse_tag("py3-none-any"),
+        ),
+    }
+
+    assert parse_project(base_dir=tmp_path) == TRUTH_PACKAGES
+
+
+COMPAT_TEST_CASES = (
+    ("pip-25.2-py3-none-any.whl", (3, 14), ("win_amd64",), True),
+    ("pip-25.2-py3-none-any.whl", (3, 14), ("win_amd64", "macosx_11_0_arm64"), True),
+    ("pip-25.2-py3-none-any.whl", None, None, True),
+    ("pip-25.2-py3-none-any.whl", (3, 14), None, True),
+    ("pip-25.2-py3-none-any.whl", None, ("win_amd64"), True),
+    ("black-25.1.0-cp313-cp313-win_amd64.whl", (3, 13), ("win_amd64",), True),
+    ("black-25.1.0-cp313-cp313-win_amd64.whl", (3, 13), ("macosx_11_0_arm64",), False),
+    ("black-25.1.0-cp313-cp313-win_amd64.whl", (3, 14), ("win_amd64",), False),
+)
+
+
+@pytest.mark.parametrize(
+    ("wheel_name", "python_version", "platforms", "truth_out"), COMPAT_TEST_CASES
+)
+def test_is_compatible_with(
+    wheel_name: str,
+    python_version: abc.Sequence[int],
+    platforms: abc.Iterable[str],
+    truth_out: bool,
+) -> None:
+    *_, tags = parse_wheel_filename(wheel_name)
+
+    assert (
+        is_compatible_with(tags=tags, python_version=python_version, platforms=platforms)
+        == truth_out
+    )

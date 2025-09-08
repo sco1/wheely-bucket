@@ -1,0 +1,114 @@
+{
+    "alternate-locations": [],
+    "files": [
+        {
+            "core-metadata": {
+                "sha256": "55e8fa1c0302540e05c13cc49bb26d7016e06fb0409a9462a7c1e0401aa8c538"
+            },
+            "data-dist-info-metadata": {
+                "sha256": "55e8fa1c0302540e05c13cc49bb26d7016e06fb0409a9462a7c1e0401aa8c538"
+            },
+            "filename": "flake8_annotations-1.0.0-py3-none-any.whl",
+            "hashes": {
+                "sha256": "1309f2bc9853a2d77d578b089d331b0b832b40c97932641e136e1b49d3650c82"
+            },
+            "provenance": null,
+            "requires-python": null,
+            "size": 10466,
+            "upload-time": "2019-09-09T12:54:33.635008Z",
+            "url": "https://files.pythonhosted.org/packages/cd/a4/af2d10e21c41bd84cb195d383cd2242a0ac73754fa2bc3e3ca20c0593723/flake8_annotations-1.0.0-py3-none-any.whl",
+            "yanked": false
+        },
+        {
+            "core-metadata": false,
+            "data-dist-info-metadata": false,
+            "filename": "flake8_annotations-1.0.0.tar.gz",
+            "hashes": {
+                "sha256": "3ecdd27054c3eed6484139025698465e3c9f4e68dbd5043d0204fcb2550ee27b"
+            },
+            "provenance": null,
+            "requires-python": null,
+            "size": 8584,
+            "upload-time": "2019-09-09T12:54:35.178455Z",
+            "url": "https://files.pythonhosted.org/packages/ea/2b/7f7bbb3ee2d7052b7db64f81aa26b5044ca387edda2b91010b9464dc1bd1/flake8_annotations-1.0.0.tar.gz",
+            "yanked": false
+        },
+        {
+            "core-metadata": false,
+            "data-dist-info-metadata": false,
+            "filename": "flake8-annotations-2.9.1.tar.gz",
+            "hashes": {
+                "sha256": "11f09efb99ae63c8f9d6b492b75fe147fbc323179fddfe00b2e56eefeca42f57"
+            },
+            "provenance": null,
+            "requires-python": ">=3.7,<4.0",
+            "size": 23117,
+            "upload-time": "2022-08-01T19:01:21.261350Z",
+            "url": "https://files.pythonhosted.org/packages/5f/d4/ed8d8e72c784dcb61df1dab7cbce61fcb3b6cd1191f60e006053e6f52925/flake8-annotations-2.9.1.tar.gz",
+            "yanked": false
+        },
+        {
+            "core-metadata": {
+                "sha256": "fa2f40f3480d8f0f61cda698a6c53ebe669aa45e6477d325d7bb3c34e14f96cc"
+            },
+            "data-dist-info-metadata": {
+                "sha256": "fa2f40f3480d8f0f61cda698a6c53ebe669aa45e6477d325d7bb3c34e14f96cc"
+            },
+            "filename": "flake8_annotations-2.9.1-py3-none-any.whl",
+            "hashes": {
+                "sha256": "a4385158a7a9fc8af1d8820a2f4c8d03387997006a83f5f8bfe5bc6085bdf88a"
+            },
+            "provenance": null,
+            "requires-python": ">=3.7,<4.0",
+            "size": 18866,
+            "upload-time": "2022-08-01T19:01:19.932257Z",
+            "url": "https://files.pythonhosted.org/packages/f6/dc/ee0cfd300f22f169d42fd951c4a44840041f777987de8c56f861be5faefd/flake8_annotations-2.9.1-py3-none-any.whl",
+            "yanked": false
+        },
+        {
+            "core-metadata": {
+                "sha256": "c542ca26c4f097b4a062e9906bee5544edf9ce323eb432a17048da2814e7e06b"
+            },
+            "data-dist-info-metadata": {
+                "sha256": "c542ca26c4f097b4a062e9906bee5544edf9ce323eb432a17048da2814e7e06b"
+            },
+            "filename": "flake8_annotations-3.1.1-py3-none-any.whl",
+            "hashes": {
+                "sha256": "102935bdcbfa714759a152aeb07b14aee343fc0b6f7c55ad16968ce3e0e91a8a"
+            },
+            "provenance": null,
+            "requires-python": ">=3.8.1",
+            "size": 16988,
+            "upload-time": "2024-05-17T14:07:58.855261Z",
+            "url": "https://files.pythonhosted.org/packages/bf/ce/55b1908ccfd729b896a57111c40772d81c506d3710dcc15ed827c9dec661/flake8_annotations-3.1.1-py3-none-any.whl",
+            "yanked": false
+        },
+        {
+            "core-metadata": false,
+            "data-dist-info-metadata": false,
+            "filename": "flake8_annotations-3.1.1.tar.gz",
+            "hashes": {
+                "sha256": "6c98968ccc6bdc0581d363bf147a87df2f01d0d078264b2da805799d911cf5fe"
+            },
+            "provenance": null,
+            "requires-python": ">=3.8.1",
+            "size": 20113,
+            "upload-time": "2024-05-17T14:08:01.960475Z",
+            "url": "https://files.pythonhosted.org/packages/76/5d/fade294924cb9fa654eb3753181db021d73cc456c584ccfb71b1b3fa89e0/flake8_annotations-3.1.1.tar.gz",
+            "yanked": false
+        }
+    ],
+    "meta": {
+        "_last-serial": 23254752,
+        "api-version": "1.4"
+    },
+    "name": "flake8-annotations",
+    "project-status": {
+        "status": "active"
+    },
+    "versions": [
+        "1.0.0",
+        "2.9.1",
+        "3.1.1"
+    ]
+}

@@ -70,9 +70,9 @@ Usage: wheely_bucket package [OPTIONS] PACKAGES...
   Package specifiers are expected in a form understood by pip, e.g. "black" or
   "black==25.1.0"; multiple packages may be specified.
 
-  python_version and platform are expected in a form understood by 'pip
-  download'; multiple comma-delimited targets may be specified. If not
-  specified, pip will default to matching the currently running interpreter.
+  python_version and platform are expected in a form understood by pip;
+  multiple comma-delimited targets may be specified. If not specified, pip
+  will default to matching the currently running interpreter.
 
 Arguments:
   PACKAGES...  Package(s) to download  [required]
@@ -106,12 +106,11 @@ Usage: wheely_bucket project [OPTIONS] TOPDIR
 
   If recurse is True, the specified base directory is assumed to contain one
   or more projects managed by uv, and will recursively parse all contained
-  lockfiles for locked dependencies. To avoid resolver issues, 'pip download'
-  is called for each child project discovered.
+  lockfiles for locked dependencies.
 
-  python_version and platform are expected in a form understood by 'pip
-  download'; multiple comma-delimited targets may be specified. If not
-  specified, pip will default to matching the currently running interpreter.
+  python_version and platform are expected in a form understood by pip;
+  multiple comma-delimited targets may be specified. If not specified, pip
+  will default to matching the currently running interpreter.
 
 Arguments:
   TOPDIR  Base directory  [required]
