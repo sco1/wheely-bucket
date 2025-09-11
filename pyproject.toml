@@ -1,6 +1,6 @@
 [project]
 name = "wheely-bucket"
-version = "0.3.0"
+version = "0.3.1"
 description = "Cache wheels for your locked dependencies"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -49,9 +49,9 @@ dev-dependencies = [
     "mypy~=1.14",
     "pre-commit~=4.0",
     "pytest~=8.3",
-    "pytest-cov~=6.0",
+    "pytest-cov~=7.0",
     "pytest-mock~=3.14",
-    "pytest-randomly~=3.16",
+    "pytest-randomly~=4.0",
     "ruff~=0.9",
     "rumdl~=0.0.128",
     "sco1-bumper~=2.0",

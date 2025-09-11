@@ -2,7 +2,7 @@ import platform
 
 import httpx
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __url__ = "https://github.com/sco1/wheely-bucket"
 
 USER_AGENT = (
