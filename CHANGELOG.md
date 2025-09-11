@@ -2,6 +2,11 @@
 
 Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (`<major>`.`<minor>`.`<patch>`)
 
+## `[v0.3.1]`
+
+### Changed
+* #6 Broaden wheel compatibility search to include `py` tags rather than only CPython tags (`cp`).
+
 ## `[v0.3.0]`
 
 ### Changed

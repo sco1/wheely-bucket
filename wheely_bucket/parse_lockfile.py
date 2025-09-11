@@ -5,7 +5,7 @@ from collections import abc
 from dataclasses import dataclass
 from pathlib import Path
 
-from packaging.tags import Tag, cpython_tags
+from packaging.tags import Tag, compatible_tags, cpython_tags
 from packaging.utils import parse_wheel_filename
 from packaging.version import Version
 from pip._internal.locations import USER_CACHE_DIR
@@ -13,8 +13,6 @@ from pip._internal.locations import USER_CACHE_DIR
 PIP_CACHE_BASE = Path(USER_CACHE_DIR)
 PIP_HTTP_CACHE = PIP_CACHE_BASE / "http-v2"
 PIP_USER_WHEEL_CACHE = PIP_CACHE_BASE / "wheels"
-
-NONE_ANY_TAG = Tag("py3", "none", "any")
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,11 +94,11 @@ def is_compatible_with(
     The expected form of `python_version` and `platforms` matches that of
     `packaging.tags.cpython_tags`.
     """
-    if NONE_ANY_TAG in tags:
-        # Short-circuit on universal wheel, this tag is not yielded by cpython_tags
-        return True
-
     for tag in cpython_tags(python_version=python_version, platforms=platforms):
+        if tag in tags:
+            return True
+
+    for tag in compatible_tags(python_version=python_version, platforms=platforms):
         if tag in tags:
             return True
 

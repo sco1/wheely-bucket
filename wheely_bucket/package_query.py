@@ -1,4 +1,3 @@
-import platform
 import re
 
 import httpx
@@ -6,16 +5,11 @@ from packaging.requirements import Requirement
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
-from wheely_bucket import __url__, __version__
+from wheely_bucket import USER_AGENT
 from wheely_bucket.parse_lockfile import PackageSpec
 
 PYPI_SIMPLE_API = "https://pypi.org/simple/"
 ACCEPT_JSON = "application/vnd.pypi.simple.v1+json"
-USER_AGENT = (
-    f"wheely-bucket/{__version__} ({__url__}) "
-    f"httpx/{httpx.__version__} "
-    f"{platform.python_implementation()}/{platform.python_version()}"
-)
 HEADER = {
     "User-Agent": USER_AGENT,
     "Accept": ACCEPT_JSON,
