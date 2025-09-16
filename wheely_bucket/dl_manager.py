@@ -4,6 +4,7 @@ from pathlib import Path
 
 import httpx
 
+from wheely_bucket import USER_AGENT
 from wheely_bucket.parse_lockfile import PackageSpec, is_compatible_with
 
 
@@ -64,7 +65,7 @@ def download_packages(packages: abc.Iterable[PackageSpec], dest: Path) -> None:
 
         to_download.append(p)
 
-    with httpx.Client() as client:
+    with httpx.Client(headers={"User-Agent": USER_AGENT}) as client:
         for p in to_download:
             dest_filepath = dest / p.wheel_name
             with client.stream("GET", p.wheel_url) as r:
