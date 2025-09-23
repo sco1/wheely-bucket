@@ -38,8 +38,8 @@ Changelog = "https://github.com/sco1/wheely-bucket/blob/main/CHANGELOG.md"
 [project.scripts]
 wheely_bucket = "wheely_bucket.cli:wb_cli"
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "black~=25.0",
     "cogapp~=3.5",
     "flake8~=7.1",

@@ -39,7 +39,7 @@ def _dl_pipeline(
 
     dest.mkdir(parents=True, exist_ok=True)
     filtered = filter_packages(packages=packages, python_versions=pyvers, platforms=plat)
-    print(f"Found compatible {len(filtered)} wheels to download...")
+    print(f"Found {len(filtered)} compatible wheels to download...")
     download_packages(packages=filtered, dest=dest)
 
 
