@@ -26,16 +26,18 @@ def _normalize(package_name: str) -> str:
     return re.sub(r"[-_.]+", "-", package_name).lower()
 
 
-def query_pypi_simple(package_name: str) -> tuple[list[PackageSpec], list[Version]]:
+async def query_pypi_simple(
+    client: httpx.AsyncClient, package_name: str
+) -> tuple[list[PackageSpec], list[Version]]:
     """
     Query the PyPI Simple Repository API for wheels & releases available for the specified package.
 
-    Specs should be reterned in reverse chronological order.
+    Specs should be returned in reverse chronological order.
 
     NOTE: Yanked wheels are not included in the final output, though may still be included in the
     version list.
     """
-    r = httpx.get(
+    r = await client.get(
         f"{PYPI_SIMPLE_API}{_normalize(package_name)}/",
         headers=HEADER,
         follow_redirects=True,
@@ -59,13 +61,15 @@ def query_pypi_simple(package_name: str) -> tuple[list[PackageSpec], list[Versio
     return packages, releases
 
 
-def filtered_pypi_query(req: Requirement) -> set[PackageSpec]:
+async def filtered_pypi_query(client: httpx.AsyncClient, req: Requirement) -> set[PackageSpec]:
     """
     Query the PyPI Simple Repository API for wheels that satisfy the provided requirement.
 
     NOTE: Yanked wheels are not included in the final output.
     """
-    available_packages, available_versions = query_pypi_simple(req.name)
+    available_packages, available_versions = await query_pypi_simple(
+        client=client, package_name=req.name
+    )
     filtered_packages: set[PackageSpec] = set()
 
     # For an unspecified requirement, set the specifier to the latest version

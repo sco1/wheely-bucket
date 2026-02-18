@@ -1,11 +1,14 @@
+import asyncio
 from collections import abc
 from pathlib import Path
 
+import anyio
+import httpx
 import typer
 from packaging.requirements import Requirement
 from packaging.version import Version
 
-from wheely_bucket.dl_manager import download_packages, filter_packages
+from wheely_bucket.dl_manager import USER_AGENT, download_packages, filter_packages
 from wheely_bucket.package_query import filtered_pypi_query
 from wheely_bucket.parse_lockfile import PackageSpec, parse_project
 
@@ -18,7 +21,7 @@ wb_cli = typer.Typer(
 )
 
 
-def _dl_pipeline(
+async def _dl_pipeline(
     packages: abc.Iterable[PackageSpec],
     dest: Path,
     python_version: str | None,
@@ -37,10 +40,27 @@ def _dl_pipeline(
     else:
         plat = None
 
-    dest.mkdir(parents=True, exist_ok=True)
+    await anyio.Path(dest).mkdir(parents=True, exist_ok=True)
     filtered = filter_packages(packages=packages, python_versions=pyvers, platforms=plat)
     print(f"Found {len(filtered)} compatible wheels to download...")
-    download_packages(packages=filtered, dest=dest)
+    await download_packages(packages=filtered, dest=dest)
+
+
+async def _filtered_wheel_dl_pipeline(
+    packages: list[str],
+    dest: Path,
+    python_version: str | None,
+    platform: str | None,
+) -> None:
+    reqs = [Requirement(p) for p in packages]
+    wheels = set()
+    async with httpx.AsyncClient(headers={"User-Agent": USER_AGENT}) as client:
+        for r in reqs:
+            wheels |= await filtered_pypi_query(client=client, req=r)
+
+    asyncio.run(
+        _dl_pipeline(packages=wheels, dest=dest, python_version=python_version, platform=platform)
+    )
 
 
 @wb_cli.command()
@@ -60,12 +80,11 @@ def package(
     targets may be specified. If not specified, pip will default to matching the currently running
     interpreter.
     """
-    reqs = [Requirement(p) for p in packages]
-    wheels = set()
-    for r in reqs:
-        wheels |= filtered_pypi_query(r)
-
-    _dl_pipeline(packages=wheels, dest=dest, python_version=python_version, platform=platform)
+    asyncio.run(
+        _filtered_wheel_dl_pipeline(
+            packages=packages, dest=dest, python_version=python_version, platform=platform
+        )
+    )
 
 
 @wb_cli.command()
@@ -101,7 +120,9 @@ def project(
     for lf in lockfiles:
         packages |= parse_project(lf.parent, lock_filename=lock_filename)
 
-    _dl_pipeline(packages=packages, dest=dest, python_version=python_version, platform=platform)
+    asyncio.run(
+        _dl_pipeline(packages=packages, dest=dest, python_version=python_version, platform=platform)
+    )
 
 
 if __name__ == "__main__":
