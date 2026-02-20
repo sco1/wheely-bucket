@@ -1,11 +1,15 @@
-import shutil
+import asyncio
 from collections import abc
 from pathlib import Path
 
+import aioshutil
+import anyio
 import httpx
 
 from wheely_bucket import USER_AGENT
 from wheely_bucket.parse_lockfile import PackageSpec, is_compatible_with
+
+MAX_CONCURRENT_DOWNLOADS = 5
 
 
 def filter_packages(
@@ -38,7 +42,23 @@ def filter_packages(
     return keep_packages
 
 
-def download_packages(packages: abc.Iterable[PackageSpec], dest: Path) -> None:
+async def _download_package(
+    client: httpx.AsyncClient, url: str, dest: Path, wheel_name: str, semaphore: asyncio.Semaphore
+) -> None:
+    out_filepath = dest / wheel_name
+    async with semaphore:
+        print(f"Downloading {out_filepath}")
+
+        async with client.stream("GET", url) as r:
+            if r.status_code == httpx.codes.OK:
+                async with await anyio.open_file(out_filepath, "wb") as f:
+                    async for chunk in r.aiter_bytes():
+                        await f.write(chunk)
+            else:
+                print(f"Could not download package {wheel_name}: {r.status_code}")
+
+
+async def download_packages(packages: abc.Iterable[PackageSpec], dest: Path) -> None:
     """
     Attempt to download the specified package(s) to the destination directory.
 
@@ -60,20 +80,21 @@ def download_packages(packages: abc.Iterable[PackageSpec], dest: Path) -> None:
             print(f"Using cached {p.wheel_name}")
 
             # pip's cache names this as the hashed URL
-            shutil.copy(src=p.cached_wheel_path, dst=dest_filepath)
+            await aioshutil.copy(src=p.cached_wheel_path, dst=dest_filepath)
             continue
 
         to_download.append(p)
 
-    with httpx.Client(headers={"User-Agent": USER_AGENT}) as client:
-        for p in to_download:
-            dest_filepath = dest / p.wheel_name
-            with client.stream("GET", p.wheel_url) as r:
-                if r.status_code == httpx.codes.OK:
-                    with dest_filepath.open("wb") as f:
-                        for chunk in r.iter_bytes():
-                            f.write(chunk)
-
-                    print(f"Saved {dest_filepath}")
-                else:
-                    print(f"Could not download package {p.wheel_name}: {r.status_code}")
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_DOWNLOADS)
+    async with httpx.AsyncClient(headers={"User-Agent": USER_AGENT}) as client:
+        dl_tasks = [
+            _download_package(
+                client=client,
+                url=p.wheel_url,
+                dest=dest,
+                wheel_name=p.wheel_name,
+                semaphore=semaphore,
+            )
+            for p in to_download
+        ]
+        await asyncio.gather(*dl_tasks)

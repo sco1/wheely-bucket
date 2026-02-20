@@ -55,7 +55,8 @@ def test_filter_packages(
     assert filtered == truth_out
 
 
-def test_download_packages_already_exist(
+@pytest.mark.asyncio
+async def test_download_packages_already_exist(
     tmp_path: Path,
     capsys: pytest.CaptureFixture,
 ) -> None:
@@ -63,13 +64,14 @@ def test_download_packages_already_exist(
     download_wheel = tmp_path / DUMMY_PACKAGE.wheel_name
     download_wheel.touch()
 
-    download_packages(packages=(DUMMY_PACKAGE,), dest=tmp_path)
+    await download_packages(packages=(DUMMY_PACKAGE,), dest=tmp_path)
 
     captured = capsys.readouterr()
     assert captured.out.startswith("Wheel was already downloaded")
 
 
-def test_download_packages_in_pip_cache(
+@pytest.mark.asyncio
+async def test_download_packages_in_pip_cache(
     tmp_path: Path,
     capsys: pytest.CaptureFixture,
     mocker: MockerFixture,
@@ -77,12 +79,13 @@ def test_download_packages_in_pip_cache(
     # Setup & mock a fake pip cache location so we aren't actually messing with pip
     dummy_pip_cache = tmp_path / "pip_cache"
     mocker.patch("wheely_bucket.parse_lockfile.PIP_HTTP_CACHE", dummy_pip_cache)
+
     DUMMY_PACKAGE = PackageSpec.from_url("https://a.b.c/black-25.1.0-py3-none-any.whl")
     DUMMY_PACKAGE.cached_wheel_path.parent.mkdir(parents=True)
     DUMMY_PACKAGE.cached_wheel_path.touch()
 
     download_wheel = tmp_path / DUMMY_PACKAGE.wheel_name
-    download_packages(packages=(DUMMY_PACKAGE,), dest=tmp_path)
+    await download_packages(packages=(DUMMY_PACKAGE,), dest=tmp_path)
 
     captured = capsys.readouterr()
     assert captured.out.startswith("Using cached")

@@ -50,11 +50,8 @@ with SAMPLE_RESPONSE.open("r") as f:
     SAMPLE_RESPONSE_JSON = json.load(f)
 
 
-def test_query_pypi_simple(mocker: MockerFixture) -> None:
-    mocker.patch(
-        "wheely_bucket.package_query.httpx.get", return_value=DummyResponse(SAMPLE_RESPONSE_JSON)
-    )
-
+@pytest.mark.asyncio
+async def test_query_pypi_simple(mocker: MockerFixture) -> None:
     TRUTH_PACKAGES = [ANN_311, ANN_291, ANN_100]
     TRUTH_VERSIONS = [
         Version("3.1.1"),
@@ -62,12 +59,18 @@ def test_query_pypi_simple(mocker: MockerFixture) -> None:
         Version("1.0.0"),
     ]
 
-    packages, versions = query_pypi_simple("flake8-annotations")
+    mock_client = mocker.AsyncMock()
+    mock_client.get.return_value = DummyResponse(SAMPLE_RESPONSE_JSON)
+
+    packages, versions = await query_pypi_simple(
+        client=mock_client, package_name="flake8-annotations"
+    )
     assert packages == TRUTH_PACKAGES
     assert versions == TRUTH_VERSIONS
 
 
-def test_query_pypi_simple_ignore_yanked(mocker: MockerFixture) -> None:
+@pytest.mark.asyncio
+async def test_query_pypi_simple_ignore_yanked(mocker: MockerFixture) -> None:
     DUMMY_JSON = {
         "files": [
             {
@@ -77,9 +80,11 @@ def test_query_pypi_simple_ignore_yanked(mocker: MockerFixture) -> None:
         ],
         "versions": [],
     }
-    mocker.patch("wheely_bucket.package_query.httpx.get", return_value=DummyResponse(DUMMY_JSON))
 
-    packages, _ = query_pypi_simple("flake8-annotations")
+    mock_client = mocker.AsyncMock()
+    mock_client.get.return_value = DummyResponse(DUMMY_JSON)
+
+    packages, _ = await query_pypi_simple(client=mock_client, package_name="flake8-annotations")
     assert not packages
 
 
@@ -90,12 +95,13 @@ FILTER_QUERY_CASES = (  # type: ignore[var-annotated]
 )
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(("requirement", "truth_out"), FILTER_QUERY_CASES)
-def test_filtered_pypi_query(
+async def test_filtered_pypi_query(
     requirement: Requirement, truth_out: set[PackageSpec], mocker: MockerFixture
 ) -> None:
-    mocker.patch(
-        "wheely_bucket.package_query.httpx.get", return_value=DummyResponse(SAMPLE_RESPONSE_JSON)
-    )
+    mock_client = mocker.AsyncMock()
+    mock_client.get.return_value = DummyResponse(SAMPLE_RESPONSE_JSON)
 
-    assert filtered_pypi_query(requirement) == truth_out
+    wheels = await filtered_pypi_query(client=mock_client, req=requirement)
+    assert wheels == truth_out
