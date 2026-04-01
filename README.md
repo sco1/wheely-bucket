@@ -20,8 +20,9 @@ Wheels are built in CI for each released version; the latest release can be foun
 You can confirm proper installation via the `wheely_bucket` CLI:
 <!-- [[[cog
 import cog
+import os
 from subprocess import PIPE, run
-out = run(["wheely_bucket", "--help"], stdout=PIPE, encoding="ascii")
+out = run(["wheely_bucket", "--help"], stdout=PIPE, encoding="ascii", env={**os.environ, "TYPER_USE_RICH": "0"})
 cog.out(
     f"\n```text\n$ wheely_bucket --help\n{out.stdout.rstrip()}\n```\n\n"
 )
@@ -54,8 +55,9 @@ For both entry points, `python-version` and `platform` allow specification of mu
 Manual package specification is accomplished via the `wheely_bucket package` command:
 <!-- [[[cog
 import cog
+import os
 from subprocess import PIPE, run
-out = run(["wheely_bucket", "package", "--help"], stdout=PIPE, encoding="ascii")
+out = run(["wheely_bucket", "package", "--help"], stdout=PIPE, encoding="ascii", env={**os.environ, "TYPER_USE_RICH": "0"})
 cog.out(
     f"\n```text\n$ wheely_bucket package --help\n{out.stdout.rstrip()}\n```\n\n"
 )
@@ -91,8 +93,9 @@ Options:
 Project lockfile specification is accomplished via the `wheely_bucket project` command:
 <!-- [[[cog
 import cog
+import os
 from subprocess import PIPE, run
-out = run(["wheely_bucket", "project", "--help"], stdout=PIPE, encoding="ascii")
+out = run(["wheely_bucket", "project", "--help"], stdout=PIPE, encoding="ascii", env={**os.environ, "TYPER_USE_RICH": "0"})
 cog.out(
     f"\n```text\n$ wheely_bucket project --help\n{out.stdout.rstrip()}\n```\n\n"
 )

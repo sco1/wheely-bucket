@@ -2,6 +2,12 @@
 
 Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (`<major>`.`<minor>`.`<patch>`)
 
+## [v1.0.1]
+
+### Changed
+
+* (Internal) Replace deprecated `typer-slim` dependency with `typer`
+
 ## `[v1.0.0]`
 
 ### Changed
