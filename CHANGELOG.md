@@ -2,6 +2,12 @@
 
 Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (`<major>`.`<minor>`.`<patch>`)
 
+## [v1.1.0]
+
+### Changed
+
+* (Internal) Replace `httpx` with `niquests`
+
 ## [v1.0.1]
 
 ### Changed
