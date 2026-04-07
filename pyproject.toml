@@ -24,7 +24,7 @@ requires-python = ">=3.12"
 dependencies = [
     "aioshutil~=1.6",
     "anyio~=4.12",
-    "httpx~=0.28",
+    "niquests~=3.18",
     "packaging>=25.0",
     "pip>=25.2",
     "typer~=0.24",

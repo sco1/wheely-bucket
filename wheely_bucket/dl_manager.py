@@ -4,7 +4,7 @@ from pathlib import Path
 
 import aioshutil
 import anyio
-import httpx
+import niquests
 
 from wheely_bucket import USER_AGENT
 from wheely_bucket.parse_lockfile import PackageSpec, is_compatible_with
@@ -43,16 +43,20 @@ def filter_packages(
 
 
 async def _download_package(
-    client: httpx.AsyncClient, url: str, dest: Path, wheel_name: str, semaphore: asyncio.Semaphore
+    client: niquests.AsyncSession,
+    url: str,
+    dest: Path,
+    wheel_name: str,
+    semaphore: asyncio.Semaphore,
 ) -> None:
     out_filepath = dest / wheel_name
     async with semaphore:
         print(f"Downloading {out_filepath}")
 
-        async with client.stream("GET", url) as r:
-            if r.status_code == httpx.codes.OK:
+        async with await client.get(url, stream=True) as r:
+            if r.ok:
                 async with await anyio.open_file(out_filepath, "wb") as f:
-                    async for chunk in r.aiter_bytes():
+                    async for chunk in r.iter_content(chunk_size=-1):
                         await f.write(chunk)
             else:
                 print(f"Could not download package {wheel_name}: {r.status_code}")
@@ -86,7 +90,7 @@ async def download_packages(packages: abc.Iterable[PackageSpec], dest: Path) -> 
         to_download.append(p)
 
     semaphore = asyncio.Semaphore(MAX_CONCURRENT_DOWNLOADS)
-    async with httpx.AsyncClient(headers={"User-Agent": USER_AGENT}) as client:
+    async with niquests.AsyncSession(headers={"User-Agent": USER_AGENT}) as client:
         dl_tasks = [
             _download_package(
                 client=client,

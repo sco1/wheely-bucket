@@ -1,6 +1,6 @@
 import re
 
-import httpx
+import niquests
 from packaging.requirements import Requirement
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
@@ -27,7 +27,7 @@ def _normalize(package_name: str) -> str:
 
 
 async def query_pypi_simple(
-    client: httpx.AsyncClient, package_name: str
+    client: niquests.AsyncSession, package_name: str
 ) -> tuple[list[PackageSpec], list[Version]]:
     """
     Query the PyPI Simple Repository API for wheels & releases available for the specified package.
@@ -61,7 +61,7 @@ async def query_pypi_simple(
     return packages, releases
 
 
-async def filtered_pypi_query(client: httpx.AsyncClient, req: Requirement) -> set[PackageSpec]:
+async def filtered_pypi_query(client: niquests.AsyncSession, req: Requirement) -> set[PackageSpec]:
     """
     Query the PyPI Simple Repository API for wheels that satisfy the provided requirement.
 

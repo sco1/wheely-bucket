@@ -3,7 +3,7 @@ from collections import abc
 from pathlib import Path
 
 import anyio
-import httpx
+import niquests
 import typer
 from packaging.requirements import Requirement
 from packaging.version import Version
@@ -54,7 +54,7 @@ async def _filtered_wheel_dl_pipeline(
 ) -> None:
     reqs = [Requirement(p) for p in packages]
     wheels = set()
-    async with httpx.AsyncClient(headers={"User-Agent": USER_AGENT}) as client:
+    async with niquests.AsyncSession(headers={"User-Agent": USER_AGENT}) as client:
         for r in reqs:
             wheels |= await filtered_pypi_query(client=client, req=r)
 
